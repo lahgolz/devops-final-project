@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 const router = express.Router();
 
 router.get('/', (_request, response) => {
-	response.sendFile(path.join(__dirname, '../../public/index.html'));
+	response.sendFile(path.join(__dirname, '../../public/form.html'));
 });
 
 router.post(

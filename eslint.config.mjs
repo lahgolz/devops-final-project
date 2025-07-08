@@ -31,6 +31,15 @@ export default [
 	unicorn.configs.recommended,
 	prettierRecommended,
 	{
+		files: ['**/*.test.js', '**/*.spec.js'],
+		languageOptions: {
+			globals: {
+				...globals.node,
+				...globals.jest,
+			},
+		},
+	},
+	{
 		languageOptions: {
 			globals: {
 				...globals.browser,

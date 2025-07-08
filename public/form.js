@@ -1,6 +1,6 @@
 const form = document.querySelector('#ticketForm');
 const typeSelect = document.querySelector('#typeId');
-const messageDiv = document.querySelector('#message');
+const notificationDiv = document.querySelector('#notification');
 const submitButton = document.querySelector('#submitBtn');
 
 async function loadTicketTypes() {
@@ -31,17 +31,17 @@ async function loadTicketTypes() {
 }
 
 function showMessage(text, type) {
-	messageDiv.textContent = text;
-	messageDiv.className = `message ${type}`;
-	messageDiv.style.display = 'block';
+	notificationDiv.textContent = text;
+	notificationDiv.className = `message ${type}`;
+	notificationDiv.style.display = 'block';
 
 	setTimeout(() => {
-		messageDiv.style.display = 'none';
+		notificationDiv.style.display = 'none';
 	}, 5000);
 }
 
-form.addEventListener('submit', async (e) => {
-	e.preventDefault();
+form.addEventListener('submit', async (event) => {
+	event.preventDefault();
 
 	const formData = new FormData(form);
 	const data = {

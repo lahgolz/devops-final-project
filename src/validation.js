@@ -5,7 +5,7 @@ export function validateFormData(data) {
 
 	const errors = [];
 
-	if (!data.typeId || typeof data.typeId !== 'number') {
+	if (data.typeId == null || typeof data.typeId !== 'number') {
 		errors.push('Type ID is required and must be a number');
 	} else if (data.typeId <= 0) {
 		errors.push('Type ID must be a positive integer');
@@ -13,7 +13,7 @@ export function validateFormData(data) {
 		errors.push('Type ID must be an integer');
 	}
 
-	if (!data.email || typeof data.email !== 'string') {
+	if (data.email == null || typeof data.email !== 'string') {
 		errors.push('Email is required and must be a string');
 	} else if (data.email.trim().length === 0) {
 		errors.push('Email cannot be empty');
@@ -27,7 +27,7 @@ export function validateFormData(data) {
 		}
 	}
 
-	if (!data.message || typeof data.message !== 'string') {
+	if (data.message == null || typeof data.message !== 'string') {
 		errors.push('Message is required and must be a string');
 	} else if (data.message.trim().length === 0) {
 		errors.push('Message cannot be empty');
