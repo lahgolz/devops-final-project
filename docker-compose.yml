@@ -1,7 +1,6 @@
 services:
   db:
     image: mariadb
-    restart: always
     ports:
       - '3306:${MARIADB_PORT:-3306}'
     environment:
