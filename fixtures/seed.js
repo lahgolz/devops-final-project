@@ -61,6 +61,8 @@ export async function seedDatabase() {
 		}
 
 		console.log('Database with sample data created successfully');
+
+		connection.destroy();
 	} catch (error) {
 		console.error('Database seeding error:', error);
 
