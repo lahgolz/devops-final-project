@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import { connectDatabase } from '../src/db/connection';
+import { connectDatabase } from '../src/db/connection.js';
 
 export async function seedDatabase() {
 	try {
