@@ -21,7 +21,11 @@ jobs:
           MARIADB_USER: root
         ports:
           - 3306:3306
-        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=5s --health-timeout=2s --health-retries=3
+        healthcheck:
+          test: ['CMD', 'mariadb-admin', 'ping', '-h', 'localhost']
+          interval: 10s
+          timeout: 5s
+          retries: 5
 
     env:
       MARIADB_HOST: localhost
@@ -110,3 +114,59 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Deploy to remote server via SSH
+        continue-on-error: true
+        run: |
+          # Setup SSH key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+          # Get the image tag
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Deploying image: $IMAGE_TAG"
+
+          # Connect to server and deploy
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }} << EOF
+            echo "Connected to server, updating application..."
+
+            # Login to GitHub Container Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull the latest image
+            echo "Pulling latest image: $IMAGE_TAG"
+            docker pull $IMAGE_TAG
+
+            # Stop and remove existing container
+            docker stop app-container 2>/dev/null || true
+            docker rm app-container 2>/dev/null || true
+
+            # Run the new container
+            echo "Starting new container..."
+            docker run -d \
+              --name app-container \
+              -p 3000:3000 \
+              --restart unless-stopped \
+              -e MARIADB_HOST=${{ secrets.MARIADB_HOST }} \
+              -e MARIADB_PORT=${{ secrets.MARIADB_PORT }} \
+              -e MARIADB_USER=${{ secrets.MARIADB_USER }} \
+              -e MARIADB_ROOT_PASSWORD=${{ secrets.MARIADB_ROOT_PASSWORD }} \
+              -e MARIADB_DATABASE=${{ secrets.MARIADB_DATABASE }} \
+              -e ADMIN_USER=${{ secrets.ADMIN_USER }} \
+              -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+              $IMAGE_TAG
+
+            # Wait for container to start
+            sleep 5
+
+            # Check deployment status
+            echo "Deployment status:"
+            docker ps | grep app-container || echo "Container not running"
+
+            # Clean up old images
+            docker image prune -f
+
+            echo "Deployment completed successfully!"
+          EOF
