@@ -21,11 +21,6 @@ jobs:
           MARIADB_USER: root
         ports:
           - 3306:3306
-        healthcheck:
-          test: ['CMD', 'mariadb-admin', 'ping', '-h', 'localhost']
-          interval: 10s
-          timeout: 5s
-          retries: 5
 
     env:
       MARIADB_HOST: localhost
